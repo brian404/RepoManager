@@ -35,7 +35,7 @@ def list_repositories(access_token):
         print("Failed to retrieve repositories.")
 
 def delete_repository(access_token):
-    list_repositories(access_token)
+    repositories = list_repositories(access_token)
     repo_number = input("Enter the number of the repository to delete: ")
     confirmation = input(f"Are you sure you want to delete the repository '{repositories[int(repo_number) - 1]['name']}'? (y/n): ")
 

@@ -19,8 +19,9 @@ def delete_repository(username, token, repo_name):
         print(f"Failed to delete the repository '{repo_name}'.")
 
 def main():
-    print("Repo Manager Tool")
-    print("------------------")
+    print("╔════════════════════════╗")
+    print("║ Repo Manager Tool                                        ║")
+    print("╚════════════════════════╝")
 
     username = input("Enter your GitHub username: ")
     token = input("Enter your GitHub personal access token with repo scope: ")

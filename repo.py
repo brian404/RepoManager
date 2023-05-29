@@ -36,8 +36,11 @@ def list_repositories(username, token):
         print("Available Repositories:")
         for i, repo in enumerate(repos, start=1):
             print(f"{i}. {repo['name']}")
+        
+        return repos
     else:
         print("Failed to retrieve repositories. Incorrect authentication. Please check your username and access token.")
+        return None
 
 def main():
     print(colored("╔════════════════════════╗", "green"))
@@ -81,22 +84,24 @@ def main():
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            list_repositories(username, token)
+            repositories = list_repositories(username, token)
         elif choice == "2":
+            if repositories is None:
+                print(colored("Failed to retrieve repositories. Please select option 1 first.", "red"))
+                continue
+
             repo_numbers = input("Enter the number(s) of the repository to delete (separated by commas): ")
             repo_numbers = [int(num.strip()) for num in repo_numbers.split(',') if num.strip().isdigit()]
             if not repo_numbers:
                 print(colored("Invalid input. Please enter valid repository number(s).", "red"))
                 continue
 
-            repositories = list_repositories(username, token)
             selected_repos = [repositories[num - 1]['name'] for num in repo_numbers if 0 < num <= len(repositories)]
-
             if not selected_repos:
-                print(colored("Invalid repository number(s). No repositories selected for deletion.", "red"))
+                print(colored("Invalid repository number(s). Please enter valid repository number(s).", "red"))
                 continue
 
-            print(f"Are you sure you want to delete the following repositories? (y/n):")
+            print("Are you sure you want to delete the following repositories? (y/n):")
             for repo in selected_repos:
                 print(repo)
 

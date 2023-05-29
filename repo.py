@@ -1,7 +1,9 @@
 import requests
 import time
+from termcolor import colored
 
 SESSION_DURATION = 30 * 60  # 30 minutes in seconds
+MAX_AUTH_ATTEMPTS = 3
 
 def delete_repository(username, token, repo_name):
     delete_url = f'https://api.github.com/repos/{username}/{repo_name}'
@@ -38,17 +40,39 @@ def list_repositories(username, token):
         print("Failed to retrieve repositories. Incorrect authentication. Please check your username and access token.")
 
 def main():
-    print("╔════════════════════════╗")
-    print("║   Repo Manager Tool     ║")
-    print("╚════════════════════════╝")
+    print(colored("╔════════════════════════╗", "green"))
+    print(colored("║ Repo Manager Tool      ║", "green"))
+    print(colored("╚════════════════════════╝", "green"))
+    print()
 
-    username = input("Enter your GitHub username: ")
-    token = input("Enter your GitHub Access Token: ")
+    auth_attempts = 0
+    while auth_attempts < MAX_AUTH_ATTEMPTS:
+        username = input("Enter your GitHub username: ")
+        token = input("Enter your GitHub Access Token: ")
 
-    session_start = time.time()
-    session_end = session_start + SESSION_DURATION
+        url = f'https://api.github.com/users/{username}'
 
-    while time.time() < session_end:
+        headers = {
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            print(colored("Successfully logged in!", "green"))
+            break
+        else:
+            print(colored("Failed to authenticate. Please try again.", "red"))
+            auth_attempts += 1
+
+    if auth_attempts == MAX_AUTH_ATTEMPTS:
+        print(colored("Authorization revoked. Exiting...", "red"))
+        return
+
+    session_start_time = time.time()
+
+    while True:
         print("\nMenu Options:")
         print("1. List Repositories")
         print("2. Delete Repositories")
@@ -56,50 +80,42 @@ def main():
 
         choice = input("Enter your choice: ")
 
-        if choice == '1':
+        if choice == "1":
             list_repositories(username, token)
-        elif choice == '2':
-            url = f'https://api.github.com/users/{username}/repos'
+        elif choice == "2":
+            repo_numbers = input("Enter the number(s) of the repository to delete (separated by commas): ")
+            repo_numbers = [int(num.strip()) for num in repo_numbers.split(',') if num.strip().isdigit()]
+            if not repo_numbers:
+                print(colored("Invalid input. Please enter valid repository number(s).", "red"))
+                continue
 
-            headers = {
-                'Authorization': f'token {token}',
-                'Accept': 'application/vnd.github.v3+json'
-            }
+            repositories = list_repositories(username, token)
+            selected_repos = [repositories[num - 1]['name'] for num in repo_numbers if 0 < num <= len(repositories)]
 
-            response = requests.get(url, headers=headers)
+            if not selected_repos:
+                print(colored("Invalid repository number(s). No repositories selected for deletion.", "red"))
+                continue
 
-            if response.status_code == 200:
-                repos = response.json()
+            print(f"Are you sure you want to delete the following repositories? (y/n):")
+            for repo in selected_repos:
+                print(repo)
 
-                print("Available Repositories:")
-                for i, repo in enumerate(repos, start=1):
-                    print(f"{i}. {repo['name']}")
-
-                repo_numbers = input("Enter the number(s) of the repository to delete (separated by commas): ")
-                repo_numbers = [int(num.strip()) for num in repo_numbers.split(',') if num.strip()]
-
-                for repo_number in repo_numbers:
-                    if repo_number < 1 or repo_number > len(repos):
-                        print(f"Invalid repository number '{repo_number}'. Skipping...")
-                        continue
-
-                    selected_repo = repos[repo_number - 1]
-
-                    confirm = input(f"Are you sure you want to delete the repository '{selected_repo['name']}'? (y/n): ")
-                    if confirm.lower() == 'y':
-                        delete_repository(username, token, selected_repo['name'])
-                    else:
-                        print(f"Deletion cancelled for repository '{selected_repo['name']}'.")
-
+            confirm = input()
+            if confirm.lower() == 'y':
+                for repo_name in selected_repos:
+                    delete_repository(username, token, repo_name)
             else:
-                print("Failed to retrieve repositories. Incorrect authentication. Please check your username and access token.")
-                break
+                print("Deletion cancelled by user.")
+        elif choice == "3":
+            print(colored("Exiting...", "red"))
+            break
+        else:
+            print(colored("Invalid choice. Please enter a valid menu option.", "red"))
 
-        elif choice == '3':
-            print("Exiting...")
+        current_time = time.time()
+        if current_time - session_start_time > SESSION_DURATION:
+            print(colored("Session expired. Please log in again.", "red"))
             break
 
-    print("Session has expired. Exiting...")
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

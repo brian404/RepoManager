@@ -14,7 +14,9 @@ def main():
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            list_repositories(access_token)
+            repositories = list_repositories(access_token)
+            if repositories:
+                print_repositories(repositories)
         elif choice == "2":
             delete_repository(access_token)
         elif choice == "3":
@@ -26,28 +28,38 @@ def main():
 
 def list_repositories(access_token):
     response = requests.get("https://api.github.com/user/repos", headers={"Authorization": f"token {access_token}"})
-    repositories = response.json()
-
     if response.status_code == 200:
-        for index, repo in enumerate(repositories, start=1):
-            print(f"{index}. {repo['name']}")
+        return response.json()
     else:
         print("Failed to retrieve repositories.")
+        return None
+
+def print_repositories(repositories):
+    for index, repo in enumerate(repositories, start=1):
+        print(f"{index}. {repo['name']}")
 
 def delete_repository(access_token):
     repositories = list_repositories(access_token)
-    repo_number = input("Enter the number of the repository to delete: ")
-    confirmation = input(f"Are you sure you want to delete the repository '{repositories[int(repo_number) - 1]['name']}'? (y/n): ")
+    if repositories:
+        print_repositories(repositories)
+        repo_number = input("Enter the number of the repository to delete: ")
 
-    if confirmation.lower() == "y":
-        response = requests.delete(f"https://api.github.com/repos/{repositories[int(repo_number) - 1]['full_name']}", headers={"Authorization": f"token {access_token}"})
+        if repo_number.isdigit() and int(repo_number) <= len(repositories):
+            confirmation = input(f"Are you sure you want to delete the repository '{repositories[int(repo_number) - 1]['name']}'? (y/n): ")
 
-        if response.status_code == 204:
-            print("Repository deleted successfully.")
+            if confirmation.lower() == "y":
+                response = requests.delete(f"https://api.github.com/repos/{repositories[int(repo_number) - 1]['full_name']}", headers={"Authorization": f"token {access_token}"})
+
+                if response.status_code == 204:
+                    print("Repository deleted successfully.")
+                else:
+                    print(f"Failed to delete the repository '{repositories[int(repo_number) - 1]['name']}'.")
+            else:
+                print("Operation cancelled.")
         else:
-            print(f"Failed to delete the repository '{repositories[int(repo_number) - 1]['name']}'.")
+            print("Invalid repository number.")
     else:
-        print("Operation cancelled.")
+        print("No repositories to delete.")
 
 if __name__ == "__main__":
     main()

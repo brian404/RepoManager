@@ -23,7 +23,12 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Create a GitHub access token with the necessary permissions. You can follow the instructions [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to create a token. Make sure to grant the appropriate scopes, including the `repo` scope if you want to delete repositories.
+1. Create a GitHub access token with the necessary permissions. You can follow the instructions [here](https://github.com/settings/tokens) to create a token. Make sure to grant the appropriate scopes, including the `repo` scope if you want to delete repositories. Ensure that the "repo" scope is selected to allow deleting repositories.
+
+2. Run the following command to start the RepoManager tool:
+
+   ```bash
+   python repo.py
 
 2. Run the following command to start the RepoManager tool:
 

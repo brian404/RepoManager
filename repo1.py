@@ -20,11 +20,11 @@ def delete_repository(username, token, repo_name):
 
 def main():
     print("╔════════════════════════╗")
-    print("║ Repo Manager Tool                                        ║")
+    print("║   Repo Manager Tool     ║")
     print("╚════════════════════════╝")
 
     username = input("Enter your GitHub username: ")
-    token = input("Enter your GitHub personal access token with repo scope: ")
+    token = input("Enter your GitHub Access Token: ")
 
     session_start = time.time()
     session_end = session_start + SESSION_DURATION

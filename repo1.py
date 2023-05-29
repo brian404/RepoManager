@@ -1,5 +1,4 @@
 import requests
-import PySimpleGUI as sg
 
 BANNER = r'''
 ╔════════════════════════╗

@@ -101,4 +101,5 @@ def main():
 
     print("Session has expired. Exiting...")
 
-if __name__
+if __name__ == "__main__":
+    main()
